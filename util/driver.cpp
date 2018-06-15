@@ -1,10 +1,11 @@
 #include "../lib/headers/coder.h"
 #include <iostream>
 #include <fstream>
+#include <time.h>
 using namespace std;
 using namespace my;
 constexpr unsigned int MEGABYTE = 1024 * 1024;
-constexpr unsigned int CHUNK_SIZE = 128 * MEGABYTE; //change this
+constexpr unsigned int CHUNK_SIZE = 32 * MEGABYTE; //change this
 int main(int argc, char *argv[])
 {
 	string mode, in_name, out_name;
@@ -19,6 +20,8 @@ int main(int argc, char *argv[])
 			{
 				ifstream in;
 				ofstream out;
+				clock_t t;
+				t = clock();
 				in.open(in_name, ios::binary);
 				out.open(out_name, ios::binary);
 				if (mode == "encode")
@@ -33,6 +36,8 @@ int main(int argc, char *argv[])
 					bool not_end = true;
 					while (not_end) { not_end = decoder.decode(in, out); }
 				}
+				t = clock() - t;
+				cout << "Execution time: " << (float)t / CLOCKS_PER_SEC;
 
 			}
 			catch (std::runtime_error e)

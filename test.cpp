@@ -1,4 +1,4 @@
-#include "lib/headers/coder.h"
+#include "../../Project1/Project1/lib/headers/coder.h"
 #include <sstream>
 #include <stdlib.h>
 #include <time.h>

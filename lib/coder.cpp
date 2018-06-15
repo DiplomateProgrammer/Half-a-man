@@ -100,7 +100,11 @@ bool coder::encode(unsigned const int size, std::istream &in, std::ostream &out)
 {
 	char *buffer = new char[size];
 	in.read(buffer, size);
-	if (in.gcount() == 0) return false;
+	if (in.gcount() == 0)
+	{
+		print_bytes(0, 2, out);
+		return false;
+	}
 	vector<unsigned int> freq(256, 0);
 	for(size_t i = 0; i < in.gcount(); i++)
 	{
