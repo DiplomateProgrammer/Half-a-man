@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
 				{
 					tree *dic = coder::read_tree(in);
 					bool not_end = true;
+					if (dic->is_leaf()) cout << "Incorrect input";
 					while (not_end && dic->correct()) 
 					{ not_end = coder::decode(in, out, dic); }
 					delete_tree(dic);
