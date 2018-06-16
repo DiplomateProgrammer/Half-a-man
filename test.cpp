@@ -1,4 +1,4 @@
-#include "../../Project1/Project1/lib/headers/coder.h"
+#include "lib/headers/coder.h"
 #include <sstream>
 #include <stdlib.h>
 #include <time.h>
@@ -14,13 +14,17 @@ void reset()
 string runtest(string input)
 {
 	reset();
-	start = stringstream(input);                         
-	test_coder.encode(start.str().length(), start, mid);
-	test_coder.decode(mid, finale);
+	start = stringstream(input);             
+	vector<bitstring> codes(256, bitstring());
+	test_coder.write_tree(start, mid, codes);
+	start = stringstream(input);
+	test_coder.encode(start, mid, codes);
+	tree *dic = test_coder.read_tree(mid);
+	if (dic->correct()) { test_coder.decode(mid, finale, dic); }
 	if (finale.str().compare(input))
 	{
 		incorrect++;
-		return "Error! Input |" + input + "| ,got |" + finale.str() + "|\n";
+		return "Error! Input |" + input + "|, got |" + finale.str() + "|\n";
 	}
 	else
 	{
@@ -46,6 +50,10 @@ int main()
 	cout << runtest("hello world");
 	cout << runtest("hello world!!!!!!!");
 	cout << runtest("The quick brown fox jumps over the lazy dog");
+	cout << runtest("ыыы");
+	cout << runtest("дададад");
+	cout << runtest("Пустой");
+	cout << runtest("");
 	srand(time(NULL));
 	for (unsigned int i = 0; i < 100; i++)
 	{
