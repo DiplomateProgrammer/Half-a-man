@@ -101,11 +101,12 @@ struct compare
 	}
 };
 
-tree* coder::read_tree(std::istream &in)
+std::pair<tree*, int> coder::read_tree(std::istream &in)
 {
 	unsigned int numchar = read_bytes(2, in);
 	vector<bitstring> codes(256, bitstring());
-	if (in.eof() || numchar == 0 || in.fail() || numchar > 255) { return new tree(0); }
+	if(numchar = 0) { return{ new tree(0), 1 }; }
+	if (in.eof() || in.fail() || numchar > 256) { return{ new tree(0), 0 }; }
 	for (size_t i = 0; i < numchar; i++)
 	{
 		unsigned char ch = read_char(in);
@@ -117,11 +118,11 @@ tree* coder::read_tree(std::istream &in)
 		for (size_t j = 0; j < num_bytes; j++)
 		{
 			byte = read_char(in);
-			if (in.fail()) { return new tree(0); }
+			if (in.fail()) { return {new tree(0), 0 }; }
 			cur.append(byte);
 		}
 		byte = read_char(in);
-		if (in.fail()) { return new tree(0); }
+		if (in.fail()) { return {new tree(0), 0 }; }
 		for (unsigned char j = 0; j <= last_bit; j++)
 		{
 			bool bit = get_bit(byte, j);
@@ -129,7 +130,7 @@ tree* coder::read_tree(std::istream &in)
 		}
 		codes[ch] = cur;
 	}
-	return build_tree(codes);
+	return { build_tree(codes), 1};
 }
 void coder::write_tree(std::istream &in, std::ostream &out, std::vector<bitstring> &codes)
 {
@@ -224,10 +225,11 @@ bool coder::encode(std::istream &in, std::ostream &out, const std::vector<bitstr
 	//out << coded;
 	return !in.eof();
 }
-bool coder::decode(std::istream &in, std::ostream &out, tree *root)
+int coder::decode(std::istream &in, std::ostream &out, tree *root)
 {
 	unsigned int num_bits = read_bytes(4, in);
-	if (in.fail()) return false;
+	if (root->is_leaf() && !in.fail()) return -1;
+	if (in.fail()) return 0;
 	unsigned char byte;
 	unsigned char cur_bit = 7;
 	bool bit;
@@ -240,12 +242,12 @@ bool coder::decode(std::istream &in, std::ostream &out, tree *root)
 		{
 			cur_bit = 0;
 			byte = read_char(in);
-			if (in.fail()) return false;
+			if (in.fail()) return -1;
 		}
 		bit = get_bit(byte, cur_bit);
 		if (bit == 0) { cur = cur->l; }
 		else { cur = cur->r; }
-		if (!cur) { return false; }
+		if (!cur) { return -1; }
 		if (cur->is_leaf())
 		{
 			buffer.push_back(cur->ch);
@@ -253,5 +255,5 @@ bool coder::decode(std::istream &in, std::ostream &out, tree *root)
 		}
 	}
 	out.write(buffer.data(), buffer.size());
-	return true;
+	return 1;
 }
