@@ -7,7 +7,7 @@ using std::vector;
 using std::multiset;
 using std::pair;
 using namespace my;
-#pragma comment(linker, "/STACK:1209715200")
+//#pragma comment(linker, "/STACK:1209715200")
 struct compare
 {
 	bool operator()(pair<unsigned int, tree*> a, pair<unsigned int, tree*> b)
@@ -129,7 +129,7 @@ tree* coder::read_tree(std::istream &in)
 }
 void coder::write_tree(std::istream &in, std::ostream &out, std::vector<bitstring> &codes)
 {
-	char buffer[CHUNK_SIZE];
+	char *buffer = new char[CHUNK_SIZE];
 	in.read(buffer, CHUNK_SIZE);
 	std::streamsize pos = 0;
 	vector<unsigned int> freq(256, 0);
@@ -188,6 +188,7 @@ void coder::write_tree(std::istream &in, std::ostream &out, std::vector<bitstrin
 	{
 		if (freq[i] != 0) { out << (unsigned char)i << (unsigned char)codes[i].get_num_bits() << codes[i]; }
 	}
+	delete[] buffer;
 }
 void coder::test_read(unsigned const int size, std::istream &in)
 {
