@@ -4,8 +4,6 @@
 #include <time.h>
 using namespace std;
 using namespace my;
-constexpr unsigned int MEGABYTE = 1024 * 1024;
-constexpr unsigned int CHUNK_SIZE = 32 * MEGABYTE; //change this
 int main(int argc, char *argv[])
 {
 	string mode, in_name, out_name;
@@ -27,14 +25,24 @@ int main(int argc, char *argv[])
 				if (mode == "encode")
 				{
 					coder encoder;
+					vector<bitstring> codes(256, bitstring());
+					/*encoder.test_read(CHUNK_SIZE, in);
+					in.close();
+					in.open(in_name, ios::binary);*/
+					encoder.write_tree(in, out, codes);
+					in.close();
+					in.open(in_name, ios::binary);
 					bool not_end = true;
-					while (not_end) { not_end = encoder.encode(CHUNK_SIZE, in, out); }
+					while (not_end) { not_end = encoder.encode(in, out, codes); }
 				}
 				else
 				{
 					coder decoder;
+					tree *dic = decoder.read_tree(in);
 					bool not_end = true;
-					while (not_end) { not_end = decoder.decode(in, out); }
+					while (not_end && dic->correct()) 
+					{ not_end = decoder.decode(in, out, dic); }
+					delete_tree(dic);
 				}
 				t = clock() - t;
 				cout << "Execution time: " << (float)t / CLOCKS_PER_SEC;

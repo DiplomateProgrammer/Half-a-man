@@ -12,3 +12,7 @@ void my::delete_tree(tree *node)
 	delete_tree(node->r);
 	delete node;
 }
+bool my::tree::correct() const
+{
+	return !is_leaf();
+}

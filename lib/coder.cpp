@@ -7,6 +7,7 @@ using std::vector;
 using std::multiset;
 using std::pair;
 using namespace my;
+#pragma comment(linker, "/STACK:209715200")
 struct compare
 {
 	bool operator()(pair<unsigned int, tree*> a, pair<unsigned int, tree*> b)
@@ -35,10 +36,10 @@ void coder::dfs_values(const tree* node, std::vector<bitstring> &res, const bits
 }
 void coder::dfs_build_tree(const bitstring &code, unsigned char pos, const char &ch, tree *node)
 {
-	if (pos >= code.get_num_bits()) 
+	if (pos >= code.get_num_bits())
 	{
 		node->ch = ch;
-		return; 
+		return;
 	}
 	if (code.get_bit(pos) == 0)
 	{
@@ -46,7 +47,7 @@ void coder::dfs_build_tree(const bitstring &code, unsigned char pos, const char 
 		{
 			tree *new_node = new tree(0);
 			node->l = new_node;
-	    }
+		}
 		dfs_build_tree(code, pos + 1, ch, node->l);
 	}
 	else
@@ -96,73 +97,11 @@ unsigned int read_bytes(unsigned char num_bytes, std::istream &in)
 	}
 	return ans;
 }
-bool coder::encode(unsigned const int size, std::istream &in, std::ostream &out)
-{
-	char *buffer = new char[size];
-	in.read(buffer, size);
-	if (in.gcount() == 0)
-	{
-		print_bytes(0, 2, out);
-		return false;
-	}
-	vector<unsigned int> freq(256, 0);
-	for(size_t i = 0; i < in.gcount(); i++)
-	{
-		freq[buffer[i] + 128]++;
-	}
-	multiset<pair<unsigned int, tree*>, compare> heap;
-	unsigned short non_zero = 0;
-	for (unsigned int i = 0; i < 256; i++)
-	{
-		if (freq[i] != 0)
-		{
-			tree *new_tree = new tree(i - 128);
-			non_zero++;
-			heap.insert({ freq[i], new_tree });
-		}
-	}
-	while (heap.size() > 1)
-	{
-		pair<unsigned int, tree*> first, second;
-		first = *heap.begin();
-		heap.erase(heap.begin());
-		second = *heap.begin();
-		heap.erase(heap.begin());
-		tree *new_tree = new tree(0);
-		new_tree->l = first.second;
-		new_tree->r = second.second;
-		heap.insert({ first.first + second.first, new_tree });
-	}
-	tree *root = heap.begin()->second;
-	if (root->is_leaf())
-	{
-		tree *new_root = new tree(0);
-		new_root->l = root;
-		root = new_root;
-	}
-	vector<bitstring> codes = vector<bitstring>(256);
-	dfs_values(root, codes);
-	print_bytes(non_zero, 2, out);
-	for (size_t i = 0; i < 256; i++)
-	{
-		if (freq[i] != 0) { out << (unsigned char)i << (unsigned char)codes[i].get_num_bits() << codes[i]; }
-	}
-	bitstring coded = bitstring();
-	for (size_t i = 0; i < in.gcount(); i++)
-	{
-		coded.append(codes[buffer[i] + 128]);
-	}
-	print_bytes(coded.get_num_bits(), 4, out);
-	out << coded; 
-	delete_tree(root);
-	delete[] buffer;
-	return !in.eof();
-}
-bool coder::decode(std::istream &in, std::ostream &out)
+tree* coder::read_tree(std::istream &in)
 {
 	unsigned int numchar = read_bytes(2, in);
-	if (in.eof() || numchar == 0) { return false; }
 	vector<bitstring> codes(256, bitstring());
+	if (in.eof() || numchar == 0) { return new tree(0); }
 	for (size_t i = 0; i < numchar; i++)
 	{
 		unsigned char ch = read_char(in);
@@ -185,8 +124,103 @@ bool coder::decode(std::istream &in, std::ostream &out)
 		}
 		codes[ch] = cur;
 	}
-	tree *root = build_tree(codes);
+	return build_tree(codes);
+}
+void coder::write_tree(std::istream &in, std::ostream &out, std::vector<bitstring> &codes)
+{
+	char buffer[CHUNK_SIZE];
+	in.read(buffer, CHUNK_SIZE);
+	unsigned long long pos = 0;
+	vector<unsigned int> freq(256, 0);
+	char ch;
+	while (true) 
+	{ 
+		if (pos == in.gcount())
+		{
+			in.read(buffer, CHUNK_SIZE);
+			pos = 0;
+		}
+		if (in.gcount() == 0) break;
+		ch = buffer[pos];
+		pos++;
+		freq[ch + 128]++;
+	}
+	multiset<pair<unsigned int, tree*>, compare> heap;
+	unsigned short non_zero = 0;
+	for (unsigned int i = 0; i < 256; i++)
+	{
+		if (freq[i] != 0)
+		{
+			tree *new_tree = new tree(i - 128);
+			non_zero++;
+			heap.insert({ freq[i], new_tree });
+		}
+	}
+	if (non_zero == 0)
+	{
+		print_bytes(0, 2, out);
+		codes = vector<bitstring>(256, bitstring());
+		return;
+	}
+	while (heap.size() > 1)
+	{
+		pair<unsigned int, tree*> first, second;
+		first = *heap.begin();
+		heap.erase(heap.begin());
+		second = *heap.begin();
+		heap.erase(heap.begin());
+		tree *new_tree = new tree(0);
+		new_tree->l = first.second;
+		new_tree->r = second.second;
+		heap.insert({ first.first + second.first, new_tree });
+	}
+	tree *root = heap.begin()->second;
+	if (root->is_leaf())
+	{
+		tree *new_root = new tree(0);
+		new_root->l = root;
+		root = new_root;
+	}
+	dfs_values(root, codes);
+	print_bytes(non_zero, 2, out);
+	for (size_t i = 0; i < 256; i++)
+	{
+		if (freq[i] != 0) { out << (unsigned char)i << (unsigned char)codes[i].get_num_bits() << codes[i]; }
+	}
+}
+void coder::test_read(unsigned const int size, std::istream &in)
+{
+	/*char ch;
+	while (true)
+	{
+		ch = read_char(in);
+		if (in.fail()) break;
+	}*/
+	char *buffer = new char[size];
+	in.read(buffer, size);
+}
+bool coder::encode(std::istream &in, std::ostream &out, const std::vector<bitstring> &codes)
+{
+	char *buffer = new char[CHUNK_SIZE];
+	in.read(buffer, CHUNK_SIZE);
+	if (in.gcount() == 0)
+	{
+		return false;
+	}
+	bitstring coded = bitstring();
+	for (size_t i = 0; i < in.gcount(); i++)
+	{
+		coded.append(codes[buffer[i] + 128]);
+	}
+	print_bytes(coded.get_num_bits(), 4, out);
+	out << coded;
+	delete[] buffer;
+	return !in.eof();
+}
+bool coder::decode(std::istream &in, std::ostream &out, tree *root)
+{
 	unsigned int num_bits = read_bytes(4, in);
+	if (in.fail()) return false;
 	unsigned char byte;
 	unsigned char cur_bit = 7;
 	bool bit;
@@ -208,6 +242,5 @@ bool coder::decode(std::istream &in, std::ostream &out)
 			cur = root;
 		}
 	}
-	delete_tree(root);
 	return true;
 }

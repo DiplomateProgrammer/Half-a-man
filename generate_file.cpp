@@ -27,5 +27,5 @@ void generate_txt_file(long long num_bytes, string file_name)
 int main()
 {
 	srand(time(NULL));
-	generate_txt_file(100 * MEGABYTE, "test_txt_file.txt");
+	generate_file(80 * MEGABYTE, "test_file.txt");
 }

@@ -57,6 +57,7 @@ void bitstring::append(const bitstring &other)
 		*this = bitstring(other);
 		return;
 	}
+	if (other.length() == 0) { return; }
 	for (size_t i = 0; i < other.length() - 1; i++)
 	{
 		storage[length() - 1] += other.storage[i] >> (last_bit + 1);
