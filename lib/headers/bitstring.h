@@ -23,5 +23,6 @@ namespace my
 		std::vector<unsigned char> storage;
 		unsigned char last_bit;
 	};
+	std::ostream& operator<<(std::ostream &os, const bitstring& bs);
 }
 #endif
