@@ -3,6 +3,7 @@
 #include <string>
 #include "tree.h"
 #include "bitstring.h"
+#include <memory>
 constexpr unsigned int MEGABYTE = 1024 * 1024;
 constexpr unsigned int CHUNK_SIZE = 1 * MEGABYTE; //change this
 namespace my
