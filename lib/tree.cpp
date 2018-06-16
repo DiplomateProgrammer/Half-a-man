@@ -1,4 +1,4 @@
-#include "headers/tree.h";
+#include "headers/tree.h"
 using namespace my;
 using my::tree;
 bool tree::is_leaf() const
