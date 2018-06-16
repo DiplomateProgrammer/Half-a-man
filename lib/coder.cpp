@@ -133,8 +133,8 @@ tree* coder::read_tree(std::istream &in)
 }
 void coder::write_tree(std::istream &in, std::ostream &out, std::vector<bitstring> &codes)
 {
-	char *buffer = new char[CHUNK_SIZE];
-	in.read(buffer, CHUNK_SIZE);
+	vector<char> buffer(CHUNK_SIZE);
+	in.read(buffer.data(), CHUNK_SIZE);
 	std::streamsize pos = 0;
 	vector<unsigned int> freq(256, 0);
 	char ch;
@@ -142,7 +142,7 @@ void coder::write_tree(std::istream &in, std::ostream &out, std::vector<bitstrin
 	{ 
 		if (pos == in.gcount())
 		{
-			in.read(buffer, CHUNK_SIZE);
+			in.read(buffer.data(), CHUNK_SIZE);
 			pos = 0;
 		}
 		if (in.gcount() == 0) break;
@@ -192,7 +192,6 @@ void coder::write_tree(std::istream &in, std::ostream &out, std::vector<bitstrin
 	{
 		if (freq[i] != 0) { out << (unsigned char)i << (unsigned char)codes[i].get_num_bits() << codes[i]; }
 	}
-	delete[] buffer;
 }
 void coder::test_read(unsigned const int size, std::istream &in)
 {
@@ -207,8 +206,8 @@ void coder::test_read(unsigned const int size, std::istream &in)
 }
 bool coder::encode(std::istream &in, std::ostream &out, const std::vector<bitstring> &codes)
 {
-	char *buffer = new char[CHUNK_SIZE];
-	in.read(buffer, CHUNK_SIZE);
+	vector<char> buffer(CHUNK_SIZE);
+	in.read(buffer.data(), CHUNK_SIZE);
 	if (in.gcount() == 0)
 	{
 		return false;
@@ -223,7 +222,6 @@ bool coder::encode(std::istream &in, std::ostream &out, const std::vector<bitstr
 	coded.to_vector(buf);
 	out.write(buf.data(), buf.size());
 	//out << coded;
-	delete[] buffer;
 	return !in.eof();
 }
 bool coder::decode(std::istream &in, std::ostream &out, tree *root)
