@@ -105,7 +105,7 @@ tree* coder::read_tree(std::istream &in)
 {
 	unsigned int numchar = read_bytes(2, in);
 	vector<bitstring> codes(256, bitstring());
-	if (in.eof() || numchar == 0 || in.fail()) { return new tree(0); }
+	if (in.eof() || numchar == 0 || in.fail() || numchar > 255) { return new tree(0); }
 	for (size_t i = 0; i < numchar; i++)
 	{
 		unsigned char ch = read_char(in);
