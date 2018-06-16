@@ -7,7 +7,7 @@ using std::vector;
 using std::multiset;
 using std::pair;
 using namespace my;
-#pragma comment(linker, "/STACK:1209715200")
+//#pragma comment(linker, "/STACK:1209715200")
 struct compare
 {
 	bool operator()(pair<unsigned int, tree*> a, pair<unsigned int, tree*> b)
@@ -105,7 +105,6 @@ tree* coder::read_tree(std::istream &in)
 	for (size_t i = 0; i < numchar; i++)
 	{
 		unsigned char ch = read_char(in);
-		char cur_char = (int)ch - 128;
 		unsigned char num_bits = read_char(in), num_bytes, last_bit;
 		num_bytes = (num_bits - 1) / 8;
 		last_bit = (num_bits - 1) % 8;
@@ -130,9 +129,9 @@ tree* coder::read_tree(std::istream &in)
 }
 void coder::write_tree(std::istream &in, std::ostream &out, std::vector<bitstring> &codes)
 {
-	char buffer[CHUNK_SIZE];
+	char *buffer = new char[CHUNK_SIZE];
 	in.read(buffer, CHUNK_SIZE);
-	unsigned long long pos = 0;
+	std::streamsize pos = 0;
 	vector<unsigned int> freq(256, 0);
 	char ch;
 	while (true) 
@@ -189,6 +188,7 @@ void coder::write_tree(std::istream &in, std::ostream &out, std::vector<bitstrin
 	{
 		if (freq[i] != 0) { out << (unsigned char)i << (unsigned char)codes[i].get_num_bits() << codes[i]; }
 	}
+	delete[] buffer;
 }
 void coder::test_read(unsigned const int size, std::istream &in)
 {
@@ -210,7 +210,7 @@ bool coder::encode(std::istream &in, std::ostream &out, const std::vector<bitstr
 		return false;
 	}
 	bitstring coded = bitstring();
-	for (size_t i = 0; i < in.gcount(); i++)
+	for (std::streamsize i = 0; i < in.gcount(); i++)
 	{
 		coded.append(codes[buffer[i] + 128]);
 	}
