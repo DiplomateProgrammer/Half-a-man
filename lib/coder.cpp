@@ -105,7 +105,7 @@ std::pair<tree*, int> coder::read_tree(std::istream &in)
 {
 	unsigned int numchar = read_bytes(2, in);
 	vector<bitstring> codes(256, bitstring());
-	if(numchar = 0) { return{ new tree(0), 1 }; }
+	if(numchar == 0) { return{ new tree(0), 1 }; }
 	if (in.eof() || in.fail() || numchar > 256) { return{ new tree(0), 0 }; }
 	for (size_t i = 0; i < numchar; i++)
 	{
