@@ -79,6 +79,13 @@ void bitstring::append(unsigned char byte)
 		storage.push_back(byte << (7 - last_bit));
 	}
 }
+void bitstring::to_vector(std::vector<char> &buf) const
+{
+	for (size_t i = 0; i < length(); i++)
+	{
+		buf[i] = ((int)storage[i] - 128);
+	}
+}
 std::ostream& my::operator<<(std::ostream& os, const bitstring &bs)
 {
 	for (auto i : bs.storage) 

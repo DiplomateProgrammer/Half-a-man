@@ -17,6 +17,7 @@ namespace my
 		unsigned int get_num_bits() const;
 		bool get_bit(unsigned int byte, unsigned char bit) const;
 		bool get_bit(unsigned int bit) const;
+		void to_vector(std::vector<char>&) const;
 	private:
 		friend std::ostream& operator<<(std::ostream &os, const bitstring& bs);
 		std::vector<unsigned char> storage;

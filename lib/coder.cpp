@@ -7,7 +7,7 @@ using std::vector;
 using std::multiset;
 using std::pair;
 using namespace my;
-#pragma comment(linker, "/STACK:209715200")
+#pragma comment(linker, "/STACK:409715200")
 struct compare
 {
 	bool operator()(pair<unsigned int, tree*> a, pair<unsigned int, tree*> b)
@@ -213,7 +213,10 @@ bool coder::encode(std::istream &in, std::ostream &out, const std::vector<bitstr
 		coded.append(codes[buffer[i] + 128]);
 	}
 	print_bytes(coded.get_num_bits(), 4, out);
-	out << coded;
+	vector<char> buf = vector<char>(coded.length());
+	coded.to_vector(buf);
+	out.write(buf.data(), buf.size());
+	//out << coded;
 	delete[] buffer;
 	return !in.eof();
 }
