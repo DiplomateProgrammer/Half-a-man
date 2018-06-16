@@ -36,11 +36,21 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
-					tree *dic = coder::read_tree(in);
-					bool not_end = true;
-					if (dic->is_leaf()) cout << "Incorrect input";
-					while (not_end && dic->correct()) 
-					{ not_end = coder::decode(in, out, dic); }
+					pair<tree*, int> tr = coder::read_tree(in);
+					tree *dic = tr.first;
+					if (tr.second == 0) { cout << "Incorrect input!!!"; }
+					else
+					{
+						int not_end = 1;
+						while (not_end == 1)
+						{
+							not_end = coder::decode(in, out, dic);
+							if (not_end == -1)
+							{
+								cout << "Incorrect input!!!";
+							}
+						}
+					}
 					delete_tree(dic);
 				}
 				t = clock() - t;
