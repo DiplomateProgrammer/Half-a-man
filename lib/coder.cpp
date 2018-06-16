@@ -6,6 +6,7 @@ using std::string;
 using std::vector;
 using std::multiset;
 using std::pair;
+using std::shared_ptr;
 using namespace my;
 #pragma comment(linker, "/STACK:1209715200")
 struct compare
@@ -101,7 +102,7 @@ tree* coder::read_tree(std::istream &in)
 {
 	unsigned int numchar = read_bytes(2, in);
 	vector<bitstring> codes(256, bitstring());
-	if (in.eof() || numchar == 0) { return new tree(0); }
+	if (in.eof() || numchar == 0 || in.fail()) { return new tree(0); }
 	for (size_t i = 0; i < numchar; i++)
 	{
 		unsigned char ch = read_char(in);
@@ -114,9 +115,11 @@ tree* coder::read_tree(std::istream &in)
 		for (size_t j = 0; j < num_bytes; j++)
 		{
 			byte = read_char(in);
+			if (in.fail()) { return new tree(0); }
 			cur.append(byte);
 		}
 		byte = read_char(in);
+		if (in.fail()) { return new tree(0); }
 		for (unsigned char j = 0; j <= last_bit; j++)
 		{
 			bool bit = get_bit(byte, j);
@@ -228,6 +231,7 @@ bool coder::decode(std::istream &in, std::ostream &out, tree *root)
 	unsigned char cur_bit = 7;
 	bool bit;
 	tree *cur = root;
+	vector<char> buffer(0);
 	for (size_t i = 0; i < num_bits; i++)
 	{
 		cur_bit++;
@@ -235,15 +239,18 @@ bool coder::decode(std::istream &in, std::ostream &out, tree *root)
 		{
 			cur_bit = 0;
 			byte = read_char(in);
+			if (in.fail()) return false;
 		}
 		bit = get_bit(byte, cur_bit);
 		if (bit == 0) { cur = cur->l; }
 		else { cur = cur->r; }
+		if (!cur) { return false; }
 		if (cur->is_leaf())
 		{
-			out << cur->ch;
+			buffer.push_back(cur->ch);
 			cur = root;
 		}
 	}
+	out.write(buffer.data(), buffer.size());
 	return true;
 }
