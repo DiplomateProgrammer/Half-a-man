@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 				cout << "Execution time: " << (float)t / CLOCKS_PER_SEC;
 
 			}
-			catch (std::runtime_error e)
+			catch (const std::runtime_error &e)
 			{
 				cout << "Error occured:\n" << e.what();
 			}
