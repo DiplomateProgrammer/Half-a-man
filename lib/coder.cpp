@@ -8,6 +8,91 @@ using std::multiset;
 using std::pair;
 using namespace my;
 //#pragma comment(linker, "/STACK:1209715200")
+namespace
+{ 
+	inline bool get_bit(const unsigned char &byte, const unsigned char &bit)
+	{
+		return (byte >> (7 - bit)) % 2;
+	}
+	void dfs_values(const tree* node, std::vector<bitstring> &res, const bitstring &cur = bitstring())
+	{
+		if (!node) return;
+		if (node->is_leaf())
+		{
+			res[node->ch + 128] = cur;
+		}
+		else
+		{
+			bitstring left(cur), right(cur);
+			left.append(false), right.append(true);
+			dfs_values(node->l, res, left);
+			dfs_values(node->r, res, right);
+		}
+	}
+	void dfs_build_tree(const bitstring &code, unsigned char pos, const char &ch, tree *node)
+	{
+		if (pos >= code.get_num_bits())
+		{
+			node->ch = ch;
+			return;
+		}
+		if (code.get_bit(pos) == 0)
+		{
+			if (!node->l)
+			{
+				tree *new_node = new tree(0);
+				node->l = new_node;
+			}
+			dfs_build_tree(code, pos + 1, ch, node->l);
+		}
+		else
+		{
+			if (!node->r)
+			{
+				tree *new_node = new tree(0);
+				node->r = new_node;
+			}
+			dfs_build_tree(code, pos + 1, ch, node->r);
+		}
+	}
+	tree* build_tree(const vector<bitstring> &codes)
+	{
+		tree *root = new tree(0);
+		for (int i = 0; i < 256; i++)
+		{
+			if (codes[i].length() > 0) { dfs_build_tree(codes[i], 0, i - 128, root); }
+		}
+		return root;
+	}
+	void print_bytes(unsigned int num, unsigned char num_bytes, std::ostream &out)
+	{
+		vector<unsigned char> bytes(num_bytes, 0);
+		for (unsigned char i = 0; i < num_bytes; i++)
+		{
+			bytes[i] = num % 256;
+			num /= 256;
+		}
+		for (unsigned char i = num_bytes - 1; i < num_bytes; i--)
+		{
+			out << bytes[i];
+		}
+	}
+	unsigned char read_char(std::istream &in)
+	{
+		char ch = in.get();
+		return *reinterpret_cast<unsigned char*>(&ch);
+	}
+	unsigned int read_bytes(unsigned char num_bytes, std::istream &in)
+	{
+		unsigned int ans = 0;
+		for (unsigned char i = 0; i < num_bytes; i++)
+		{
+			ans *= 256;
+			ans += read_char(in);
+		}
+		return ans;
+	}
+}
 struct compare
 {
 	bool operator()(pair<unsigned int, tree*> a, pair<unsigned int, tree*> b)
@@ -15,88 +100,7 @@ struct compare
 		return a.first < b.first;
 	}
 };
-inline bool get_bit(const unsigned char &byte, const unsigned char &bit)
-{
-	return (byte >> (7 - bit)) % 2;
-}
-void coder::dfs_values(const tree* node, std::vector<bitstring> &res, const bitstring &cur)
-{
-	if (!node) return;
-	if (node->is_leaf())
-	{
-		res[node->ch + 128] = cur;
-	}
-	else
-	{
-		bitstring left(cur), right(cur);
-		left.append(false), right.append(true);
-		dfs_values(node->l, res, left);
-		dfs_values(node->r, res, right);
-	}
-}
-void coder::dfs_build_tree(const bitstring &code, unsigned char pos, const char &ch, tree *node)
-{
-	if (pos >= code.get_num_bits())
-	{
-		node->ch = ch;
-		return;
-	}
-	if (code.get_bit(pos) == 0)
-	{
-		if (!node->l)
-		{
-			tree *new_node = new tree(0);
-			node->l = new_node;
-		}
-		dfs_build_tree(code, pos + 1, ch, node->l);
-	}
-	else
-	{
-		if (!node->r)
-		{
-			tree *new_node = new tree(0);
-			node->r = new_node;
-		}
-		dfs_build_tree(code, pos + 1, ch, node->r);
-	}
-}
-tree* coder::build_tree(const vector<bitstring> &codes)
-{
-	tree *root = new tree(0);
-	for (int i = 0; i < 256; i++)
-	{
-		if (codes[i].length() > 0) { dfs_build_tree(codes[i], 0, i - 128, root); }
-	}
-	return root;
-}
-void print_bytes(unsigned int num, unsigned char num_bytes, std::ostream &out)
-{
-	vector<unsigned char> bytes(num_bytes, 0);
-	for (unsigned char i = 0; i < num_bytes; i++)
-	{
-		bytes[i] = num % 256;
-		num /= 256;
-	}
-	for (unsigned char i = num_bytes - 1; i < num_bytes; i--)
-	{
-		out << bytes[i];
-	}
-}
-unsigned char read_char(std::istream &in)
-{
-	char ch = in.get();
-	return *reinterpret_cast<unsigned char*>(&ch);
-}
-unsigned int read_bytes(unsigned char num_bytes, std::istream &in)
-{
-	unsigned int ans = 0;
-	for (unsigned char i = 0; i < num_bytes; i++)
-	{
-		ans *= 256;
-		ans += read_char(in);
-	}
-	return ans;
-}
+
 tree* coder::read_tree(std::istream &in)
 {
 	unsigned int numchar = read_bytes(2, in);
@@ -195,8 +199,8 @@ void coder::test_read(unsigned const int size, std::istream &in)
 	/*char ch;
 	while (true)
 	{
-		ch = read_char(in);
-		if (in.fail()) break;
+	ch = read_char(in);
+	if (in.fail()) break;
 	}*/
 	char *buffer = new char[size];
 	in.read(buffer, size);
