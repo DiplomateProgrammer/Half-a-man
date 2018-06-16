@@ -7,7 +7,7 @@ using std::vector;
 using std::multiset;
 using std::pair;
 using namespace my;
-#pragma comment(linker, "/STACK:409715200")
+#pragma comment(linker, "/STACK:1209715200")
 struct compare
 {
 	bool operator()(pair<unsigned int, tree*> a, pair<unsigned int, tree*> b)

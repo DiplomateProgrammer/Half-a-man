@@ -83,7 +83,7 @@ void bitstring::to_vector(std::vector<char> &buf) const
 {
 	for (size_t i = 0; i < length(); i++)
 	{
-		buf[i] = ((int)storage[i] - 128);
+		buf[i] = storage[i];
 	}
 }
 std::ostream& my::operator<<(std::ostream& os, const bitstring &bs)
